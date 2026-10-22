@@ -10,9 +10,10 @@ function describeDatabaseUrl() {
   const db = resolveDatabaseUrl();
   if (!db) return "missing";
   try {
-    const host = new URL(db.url).hostname;
+    const { hostname: host, port } = new URL(db.url);
     if (["localhost", "127.0.0.1"].includes(host) && process.env.VERCEL) return `${db.name} points to localhost (wrong on Vercel)`;
-    return `set via ${db.name} (${host})`;
+    const mode = host.endsWith("pooler.supabase.com") ? (port === "6543" ? " — transaction pooler, good" : " — SESSION pooler: use port 6543") : "";
+    return `set via ${db.name} (${host}:${port || 5432})${mode}`;
   } catch {
     return `${db.name} is not a valid URL`;
   }
@@ -33,6 +34,7 @@ export async function GET() {
     DATABASE_URL: describeDatabaseUrl(),
     // Names only (no values), to spot integrations that use another name.
     databaseVariablesFound: databaseEnvNames(),
+    DIRECT_URL: process.env.DIRECT_URL ? "set" : "not set (migrations use DATABASE_URL)",
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET ? "set" : "missing",
     ADMIN_PHONE: process.env.ADMIN_PHONE ? "set" : "missing",
     OTP_PROVIDER: process.env.OTP_PROVIDER ?? "missing (defaults to console)",
