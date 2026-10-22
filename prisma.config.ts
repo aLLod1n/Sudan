@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { resolveDatabaseUrl } from "./lib/database-url.js";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -10,6 +11,6 @@ export default defineConfig({
   datasource: {
     // Optional here so `prisma generate` (run on every `npm install`, e.g. on
     // Vercel) works without a database. Migrate/seed still fail clearly if unset.
-    url: process.env.DATABASE_URL ?? "",
+    url: resolveDatabaseUrl()?.url ?? "",
   },
 });

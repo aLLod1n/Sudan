@@ -4,15 +4,18 @@
 
 import "dotenv/config";
 import { execSync } from "node:child_process";
+import { resolveDatabaseUrl } from "../lib/database-url.js";
 
 const run = (cmd) => execSync(cmd, { stdio: "inherit" });
 
-if (process.env.DATABASE_URL) {
+const db = resolveDatabaseUrl();
+if (db) {
+  console.log(`Database: using ${db.name}`);
   run("npx prisma migrate deploy");
 } else {
   console.warn(
-    "\n⚠ DATABASE_URL is not set: skipping database migrations.\n" +
-      "  Add a Postgres database (Vercel → Storage → Neon) and redeploy.\n",
+    "\n⚠ No database connection string (DATABASE_URL / POSTGRES_URL): skipping migrations.\n" +
+      "  Add a Postgres database (Vercel → Storage → Neon), connect it to this project and redeploy.\n",
   );
 }
 
