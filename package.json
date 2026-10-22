@@ -16,7 +16,7 @@
     "db:studio": "prisma studio",
     "postinstall": "prisma generate",
     "cron:expire": "tsx scripts/expire-listings.ts",
-    "vercel-build": "prisma migrate deploy && next build"
+    "vercel-build": "node scripts/vercel-build.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1155.0",
