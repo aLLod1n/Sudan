@@ -9,8 +9,9 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // Optional here so `prisma generate` (run on every `npm install`, e.g. on
-    // Vercel) works without a database. Migrate/seed still fail clearly if unset.
-    url: resolveDatabaseUrl()?.url ?? "",
+    // Migrations need a session connection: DIRECT_URL (e.g. Supabase session
+    // pooler, port 5432) when the app itself uses a transaction pooler.
+    // Optional so `prisma generate` (run on every npm install) works without a database.
+    url: process.env.DIRECT_URL || resolveDatabaseUrl()?.url || "",
   },
 });

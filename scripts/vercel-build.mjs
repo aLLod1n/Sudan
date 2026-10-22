@@ -10,7 +10,7 @@ const run = (cmd) => execSync(cmd, { stdio: "inherit" });
 
 const db = resolveDatabaseUrl();
 if (db) {
-  console.log(`Database: using ${db.name}`);
+  console.log(`Database: app uses ${db.name}, migrations use ${process.env.DIRECT_URL ? "DIRECT_URL" : db.name}`);
   run("npx prisma migrate deploy");
 } else {
   console.warn(

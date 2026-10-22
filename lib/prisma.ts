@@ -6,7 +6,14 @@ import { resolveDatabaseUrl } from "./database-url.js";
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 function createClient() {
-  const adapter = new PrismaPg({ connectionString: resolveDatabaseUrl()?.url });
+  const adapter = new PrismaPg({
+    connectionString: resolveDatabaseUrl()?.url,
+    // Serverless (Vercel) runs many small instances: keep each pool tiny so they
+    // don't exhaust the database's connection limit. Use a transaction pooler
+    // (e.g. Supabase port 6543) as DATABASE_URL there.
+    max: process.env.VERCEL ? 2 : 10,
+    idleTimeoutMillis: 10_000,
+  });
   return new PrismaClient({ adapter });
 }
 
