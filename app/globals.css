@@ -1,26 +1,141 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Design tokens from docs/DESIGN.md (Airbnb-style reference):
+ * white cards on a #f7f7f7 canvas, #222 text, one coral accent (Rausch)
+ * reserved for the logo, search submit and one primary action per surface.
+ * Light theme only.
+ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plex-arabic), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-sans);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Named design colours */
+  --color-rausch: #ff385c;
+  --color-rausch-600: #e00b41;
+  --color-hof: #222222;
+  --color-foggy: #6a6a6a;
+  --color-grey-500: #c1c1c1;
+  --color-bebe: #ebebeb;
+  --color-deco: #dddddd;
+  --color-faint: #f7f7f7;
+
+  /* Radii: inputs/ghost buttons 8px, cards 12px, large cards 14px, pills full */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 20px;
+  --radius-4xl: 32px;
+
+  /* Type scale */
+  --text-caption: 11px;
+  --text-caption--line-height: 1.18;
+  --text-ui: 16px;
+  --text-ui--line-height: 1.25;
+  --text-subheading: 20px;
+  --text-subheading--line-height: 1.2;
+  --text-heading-sm: 22px;
+  --text-heading-sm--line-height: 1.18;
+  --text-heading: 28px;
+  --text-heading--line-height: 1.43;
+
+  /* Elevation (overlays only — never on listing cards) */
+  --shadow-search: 0 0 0 1px rgba(0, 0, 0, 0.02), 0 2px 6px 0 rgba(0, 0, 0, 0.04), 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  --shadow-overlay: 0 8px 28px rgba(0, 0, 0, 0.28);
+  --shadow-menu: 0 6px 20px rgba(0, 0, 0, 0.2);
+  --shadow-tooltip: 0 2px 4px rgba(0, 0, 0, 0.18);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #f7f7f7; /* canvas */
+  --foreground: #222222; /* Hof */
+  --card: #ffffff;
+  --card-foreground: #222222;
+  --popover: #ffffff;
+  --popover-foreground: #222222;
+  --primary: #222222; /* filled inverse button */
+  --primary-foreground: #ffffff;
+  --secondary: #f7f7f7; /* circular nav buttons */
+  --secondary-foreground: #222222;
+  --muted: #f7f7f7;
+  --muted-foreground: #6a6a6a; /* Foggy */
+  --accent: #ebebeb; /* hover lift */
+  --accent-foreground: #222222;
+  /* Error text needs a red distinct from the brand accent and 4.5:1 contrast. */
+  --destructive: #c13515;
+  --border: #ebebeb; /* Bebe hairlines */
+  --input: #b0b0b0; /* input outlines: 3:1-ish against white for accessibility */
+  --ring: #222222;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-size: 14px;
+    line-height: 1.43;
+    font-feature-settings: "salt" on;
+  }
+  /* Arabic script needs more leading and must never be letter-spaced. */
+  html[dir="rtl"] body {
+    line-height: 1.6;
+  }
+  html[dir="rtl"] * {
+    letter-spacing: 0 !important;
+  }
+  /* Pointer cursor on interactive elements */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Tight display tracking from the design; ignored in Arabic (see above). */
+  .tracking-display {
+    letter-spacing: -0.02em;
+  }
+  .tracking-subheading {
+    letter-spacing: -0.009em;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }

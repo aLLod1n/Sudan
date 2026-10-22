@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+!.env.example
+
+# local uploads (dev storage)
+/uploads
+
+# prisma generated client
+/generated
+
+# local embedded PostgreSQL data
+/.postgres-data

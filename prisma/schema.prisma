@@ -1,0 +1,295 @@
+// Sudan property listings — database schema.
+// Auth tables (User, Session, Account, Verification) follow Better Auth's
+// expected shape; everything else is the listings domain.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  USER
+  AGENT
+  ADMIN
+}
+
+enum DealType {
+  RENT
+  SALE
+}
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  LAND
+  SHOP
+  OFFICE
+}
+
+enum Currency {
+  SDG
+  USD
+}
+
+enum ListingStatus {
+  PENDING // waiting for admin review (new or edited)
+  ACTIVE // visible in search
+  REJECTED // admin rejected, owner can edit and resubmit
+  EXPIRED // 30 days passed, owner can renew
+  REMOVED // taken down by admin (e.g. after a report)
+}
+
+enum ReportReason {
+  FAKE
+  UNAVAILABLE // already rented / sold
+  WRONG_INFO
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+}
+
+// ---------------------------------------------------------------------------
+// Auth (Better Auth)
+// ---------------------------------------------------------------------------
+
+model User {
+  id                  String   @id
+  name                String
+  // Better Auth requires an email; phone-only users get a generated placeholder.
+  email               String   @unique
+  emailVerified       Boolean  @default(false)
+  image               String?
+  phoneNumber         String?  @unique
+  phoneNumberVerified Boolean? @default(false)
+  role                Role     @default(USER)
+  banned              Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  sessions        Session[]
+  accounts        Account[]
+  agentProfile    AgentProfile?
+  listings        Listing[]
+  reports         Report[]      @relation("ReportReporter")
+  resolvedReports Report[]      @relation("ReportResolver")
+
+  @@index([role])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Locations
+// ---------------------------------------------------------------------------
+
+model City {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  nameAr    String
+  nameEn    String
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  neighbourhoods Neighbourhood[]
+  listings       Listing[]
+  agents         AgentProfile[]
+
+  @@map("city")
+}
+
+model Neighbourhood {
+  id        String   @id @default(cuid())
+  cityId    String
+  city      City     @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  slug      String
+  nameAr    String
+  nameEn    String
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings Listing[]
+
+  @@unique([cityId, slug])
+  @@index([cityId, sortOrder])
+  @@map("neighbourhood")
+}
+
+// ---------------------------------------------------------------------------
+// Agents
+// ---------------------------------------------------------------------------
+
+model AgentProfile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug       String   @unique
+  officeName String
+  logoKey    String? // storage key, see lib/storage.ts
+  whatsapp   String // E.164
+  bio        String?
+  cities     City[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("agent_profile")
+}
+
+// ---------------------------------------------------------------------------
+// Listings
+// ---------------------------------------------------------------------------
+
+model Listing {
+  id              String        @id @default(cuid())
+  ownerId         String
+  owner           User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  dealType        DealType
+  propertyType    PropertyType
+  cityId          String
+  city            City          @relation(fields: [cityId], references: [id])
+  neighbourhoodId String
+  neighbourhood   Neighbourhood @relation(fields: [neighbourhoodId], references: [id])
+  title           String
+  description     String
+  // Whole currency units. BigInt because SDG prices can exceed Int range.
+  price           BigInt
+  currency        Currency
+  rooms           Int?
+  areaM2          Int?
+  floor           Int?
+  furnished       Boolean       @default(false)
+  hasElectricity  Boolean       @default(false) // electricity / generator
+  hasWaterTank    Boolean       @default(false)
+  hasParking      Boolean       @default(false)
+  contactPhone    String // E.164
+  status          ListingStatus @default(PENDING)
+  verified        Boolean       @default(false)
+  rejectionReason String?
+  publishedAt     DateTime? // first approval; "newest" sort uses this
+  expiresAt       DateTime?
+  views           Int           @default(0)
+  contactClicks   Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  photos  ListingPhoto[]
+  reports Report[]
+
+  @@index([status, publishedAt])
+  @@index([status, dealType, propertyType, cityId])
+  @@index([status, currency, price])
+  @@index([status, expiresAt])
+  @@index([ownerId])
+  @@map("listing")
+}
+
+model ListingPhoto {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  key       String // storage key, see lib/storage.ts
+  width     Int
+  height    Int
+  position  Int
+  createdAt DateTime @default(now())
+
+  @@index([listingId, position])
+  @@map("listing_photo")
+}
+
+// ---------------------------------------------------------------------------
+// Moderation
+// ---------------------------------------------------------------------------
+
+model Report {
+  id           String       @id @default(cuid())
+  listingId    String
+  listing      Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reporterId   String? // null = anonymous visitor
+  reporter     User?        @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+  reason       ReportReason
+  comment      String?
+  status       ReportStatus @default(OPEN)
+  resolvedById String?
+  resolvedBy   User?        @relation("ReportResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@index([status, createdAt])
+  @@index([listingId])
+  @@map("report")
+}
+
+// ---------------------------------------------------------------------------
+// Infrastructure
+// ---------------------------------------------------------------------------
+
+// Fixed-window rate limiter (see lib/rate-limit.ts). Key examples:
+// "otp:phone:+2499...", "otp:ip:1.2.3.4", "listing:create:<userId>".
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@map("rate_limit")
+}
