@@ -5,6 +5,7 @@ import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { phoneNumber } from "better-auth/plugins";
 import { prisma } from "@/lib/prisma";
+import { siteUrl } from "@/lib/site";
 import { getOtpSender } from "@/lib/otp";
 import { normalizePhone, placeholderEmail } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
@@ -17,7 +18,7 @@ import { rateLimit } from "@/lib/rate-limit";
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   secret: process.env.BETTER_AUTH_SECRET,
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: process.env.BETTER_AUTH_URL ?? siteUrl(),
   session: {
     expiresIn: 60 * 60 * 24 * 60, // 60 days: people rarely want to log in again on their phone
     updateAge: 60 * 60 * 24,
