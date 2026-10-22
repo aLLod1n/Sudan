@@ -156,7 +156,8 @@ export function QuickSearchForm({
               enterKeyHint="search"
               placeholder={labels.keywordPlaceholder}
               onFocus={() => setStep(null)}
-              className="w-full bg-transparent text-sm text-hof outline-none placeholder:text-foggy [&::-webkit-search-cancel-button]:hidden"
+              // 16px on phones: smaller text makes iPhones zoom in on focus.
+              className="w-full bg-transparent text-base text-hof outline-none placeholder:text-foggy md:text-sm [&::-webkit-search-cancel-button]:hidden"
             />
           </label>
 

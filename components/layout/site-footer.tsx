@@ -35,10 +35,10 @@ export async function SiteFooter() {
           {columns.map((col) => (
             <div key={col.title}>
               <h2 className="mb-3 text-sm font-semibold">{col.title}</h2>
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm text-foggy hover:text-hof">
+                    <Link href={link.href} className="inline-flex min-h-11 min-w-11 items-center text-sm text-foggy hover:text-hof">
                       {link.label}
                     </Link>
                   </li>

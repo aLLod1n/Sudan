@@ -150,7 +150,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/listi
   return (
     <>
       <ViewTracker listingId={listing.id} />
-      <article className="mx-auto max-w-[1120px] px-4 pt-0 pb-36 md:px-10 md:pt-8 md:pb-16">
+      <article className="mx-auto max-w-[1120px] px-4 pt-0 pb-10 md:px-10 md:pt-8 md:pb-16">
         <div className="flex flex-col gap-4 md:gap-6">
           {/* Title above the gallery on desktop, below it on phones (same element). */}
           <h1 dir="auto" className="order-2 text-subheading font-semibold tracking-subheading md:order-1 md:text-heading-sm">
@@ -214,7 +214,7 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/listi
                 </p>
               </div>
               {listing.agent && (
-                <Link href={`/agents/${listing.agent.slug}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                <Link href={`/agents/${listing.agent.slug}`} className={buttonVariants({ variant: "outline" })}>
                   {t("viewProfile")}
                 </Link>
               )}
@@ -319,13 +319,13 @@ export default async function ListingPage({ params }: PageProps<"/[locale]/listi
       </article>
 
       {/* Phones: contact bar pinned above the bottom tab bar */}
-      <div className="fixed inset-x-0 bottom-16 z-30 border-t border-bebe bg-white px-4 py-3 md:hidden">
+      <div data-contact-bar className="fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 border-t border-bebe bg-white px-4 py-3 md:hidden">
         <div className="flex items-center gap-3">
           <Price
             price={listing.price}
             currency={listing.currency}
             dealType={listing.dealType}
-            className="min-w-0 flex-1 truncate text-sm"
+            className="min-w-0 flex-1 text-sm leading-tight"
           />
           <ContactButtons
             listingId={listing.id}

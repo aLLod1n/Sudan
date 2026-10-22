@@ -14,7 +14,7 @@ export async function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-bebe bg-white">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-4 md:h-20 md:px-10">
-        <Link href="/" aria-label={tc("siteName")} className="rounded-lg">
+        <Link href="/" aria-label={tc("siteName")} className="flex h-11 items-center rounded-lg">
           <Logo name={tc("siteName")} />
         </Link>
 

@@ -21,7 +21,7 @@ export function ListingRow({
   return (
     <section className="@container flex flex-col gap-4">
       <h2 className="text-heading-sm font-medium tracking-display">
-        <Link href={href} className="inline-flex items-center gap-2 hover:underline hover:underline-offset-4">
+        <Link href={href} className="inline-flex min-h-11 items-center gap-2 hover:underline hover:underline-offset-4">
           {title}
           <ArrowRight className="size-5 rtl:-scale-x-100" aria-hidden />
         </Link>

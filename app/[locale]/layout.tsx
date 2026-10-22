@@ -51,7 +51,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
 
   return (
     <html lang={locale} dir={localeDirection[locale]} className={plexArabic.variable}>
-      <body className="flex min-h-dvh flex-col antialiased">
+      {/* Phones: keep the page bottom clear of the fixed tab bar (+ the Call/WhatsApp bar on listings). */}
+      <body className="flex min-h-dvh flex-col antialiased max-md:pb-[calc(4rem+env(safe-area-inset-bottom))] max-md:has-[[data-contact-bar]]:pb-[calc(8.75rem+env(safe-area-inset-bottom))]">
         <a
           href="#main"
           className="sr-only z-50 rounded-lg bg-hof px-4 py-2 text-white focus:not-sr-only focus:fixed focus:start-4 focus:top-4"
@@ -62,7 +63,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
         <NextIntlClientProvider messages={pickMessages(messages, CLIENT_NAMESPACES)}>
           <AuthProvider>
           <SiteHeader />
-          <main id="main" className="flex-1 pb-20 md:pb-0">
+          <main id="main" className="flex-1">
             {children}
           </main>
           <SiteFooter />
